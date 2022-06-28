@@ -1,5 +1,7 @@
 package it.polito.tdp.itunes.model;
 
+//c.
+//classe creata per glki archi 
 public class Adiacenza {
 	private Track t1;
 	private Track t2;
@@ -36,6 +38,7 @@ public class Adiacenza {
 		this.peso = peso;
 	}
 
+	//per stampare quello che vogliamo ossia il titolo delle due canzoni e il lr peso
 	@Override
 	public String toString() {
 		return t1.getName() + " - " + t2.getName() + " = " + this.peso;

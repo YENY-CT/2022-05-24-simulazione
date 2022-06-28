@@ -79,21 +79,23 @@ public class ItunesDAO {
 		return result;
 	}
 	
+	
+	//public List<Track> getAllTracks(){ //<-- lo modifico : riceve la mappa e me lo riempie
 	public void getAllTracks(Map<Integer,Track> idMap){
 		final String sql = "SELECT * FROM Track";
-		
+		// List<Track> result = new ArrayList<Track>(); <-- cancello in quanto è void
 		try {
 			Connection conn = DBConnect.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
 			ResultSet res = st.executeQuery();
 
 			while (res.next()) {
-				
-				if(!idMap.containsKey(res.getInt("TrackId"))) {
+				//result.add(new(Track(res.getInt("TrackId"), res.getString("Name"),...)
+				if(!idMap.containsKey(res.getInt("TrackId"))) { //<-- aggiunto per vedere se la canzone si trova nella mappa se nn c'è mi creo la nuova canzone
 					Track t = new Track(res.getInt("TrackId"), res.getString("Name"), 
 							res.getString("Composer"), res.getInt("Milliseconds"), 
 							res.getInt("Bytes"),res.getDouble("UnitPrice"));
-					idMap.put(t.getTrackId(), t);
+					idMap.put(t.getTrackId(), t);//<-- aggiunto
 				}
 			
 			}
@@ -102,7 +104,9 @@ public class ItunesDAO {
 			e.printStackTrace();
 			throw new RuntimeException("SQL Error");
 		}
+		//return result; <-- cancello
 	}
+	
 	
 	public List<Genre> getAllGenres(){
 		final String sql = "SELECT * FROM Genre";
@@ -144,11 +148,13 @@ public class ItunesDAO {
 		return result;
 	}
 
-	
+	//b.
+	//vertici sono tutte le canzoni di genere g.	
 	public List<Track> getVertici(Genre genere, Map<Integer,Track> idMap) {
 		String sql = "select TrackId "
 				+ "from track "
 				+ "where GenreId = ?";
+		
 		List<Track> result = new ArrayList<>();
 		
 		try {
@@ -157,26 +163,29 @@ public class ItunesDAO {
 			st.setInt(1, genere.getGenreId());
 			ResultSet res = st.executeQuery();
 			
-			while(res.next()) {
+			while(res.next())
 				result.add(idMap.get(res.getInt("TrackId")));
-			}
 			
 			conn.close();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new RuntimeException("SQL Error");
-		}
+		  }
+		
 		return result;
 	}
 	
-	
-	public List<Adiacenza> getArchi(Genre genere, 
-			Map<Integer,Track> idMap){
+	//c.
+	//Due canzoni sono collegate tra loro se condividono lo stesso formato di file (MediaType). 
+	//Il peso dell’arco, sempre positivo, rappresenta il valore assoluto della differenza di durata tra le due canzoni, espressa in millisecondi.
+	//per prendere gli archi:
+	public List<Adiacenza> getArchi(Genre genere, Map<Integer,Track> idMap){
 		
-		String sql = "select t1.TrackId as t1, t2.TrackId as t2, abs(t1.milliseconds - t2.milliseconds) as delta "
+		String sql = "select t1.TrackId as t1, t2.TrackId as t2, abs(t1.milliseconds - t2.milliseconds) as delta " //metto abs per prendere solo il valore positivo
 				+ "from track t1, track t2 "
 				+ "where t1.TrackId > t2.TrackId and t1.MediaTypeId = t2.MediaTypeId and t1.GenreId = ? and t1.GenreId = t2.GenreId";
+		
 		List<Adiacenza> result = new ArrayList<>();
 		
 		try {
@@ -187,16 +196,17 @@ public class ItunesDAO {
 			
 			while(res.next()) {
 				result.add(new Adiacenza(idMap.get(res.getInt("t1")), 
-						idMap.get(res.getInt("t2")), res.getInt("delta")));
+										 idMap.get(res.getInt("t2")), res.getInt("delta")));
 			}
 			
 			conn.close();
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new RuntimeException("SQL Error");
-		}
-		return result;
+		  }
 		
+		return result;
 	}
 	
 	
